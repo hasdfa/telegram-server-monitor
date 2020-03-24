@@ -6,7 +6,7 @@ import persistence
 import time
 import subprocess
 import traceback
-import os
+import fs
 
 last_notification = 0
 storage = persistence.Persistence()
@@ -26,6 +26,11 @@ def processCommand(chat_id, cmd):
     except Exception:
         sendTextMessage(chat_id, "["+cmd+"] could not read response")
         print("Could not send message")
+
+def changeHealthcheckStatus():
+    myfile = open(os.environ["BACKEND-HEALTH-FILE"], 'w')
+    myfile.write('Written with Python\n')
+    myfile.close()
 
 def processMessage(message):
     if "text" in message:
