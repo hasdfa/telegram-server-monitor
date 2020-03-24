@@ -71,17 +71,17 @@ def processCommandMessage(message):
     elif command == "/disks":
         commandDisks(message)
     elif command == "/serviceStart":
-        processComand(message["chat"]["id"], "start")
+        processCommand(message["chat"]["id"], "start")
     elif command == "/serviceRestart":
-       processComand(message["chat"]["id"], "restart")
+        processCommand(message["chat"]["id"], "restart")
     elif command == "/serviceStop":
-       processComand(message["chat"]["id"], "stop")
+        processCommand(message["chat"]["id"], "stop")
     elif command == "/serviceStatus":
-       processComand(message["chat"]["id"], "status")
+        processCommand(message["chat"]["id"], "status")
     elif command == "/healthAlive":
-       changeHealthcheckStatus(message["chat"]["id"], "alive")
+        changeHealthcheckStatus(message["chat"]["id"], "alive")
     elif command == "/healthDead":
-       changeHealthcheckStatus(message["chat"]["id"], "dead")
+        changeHealthcheckStatus(message["chat"]["id"], "dead")
     else:
         sendTextMessage(message["chat"]["id"], "I do not know what you mean.")
 
