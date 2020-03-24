@@ -10,7 +10,7 @@ import traceback
 last_notification = 0
 storage = persistence.Persistence()
 
-def processComand(chat_id, cmd):
+def processCommand(chat_id, cmd):
     risp = ""
     try:
         risp = subprocess.check_output("service backend " + cmd, shell=True)
@@ -23,7 +23,7 @@ def processComand(chat_id, cmd):
         else:
             sendTextMessage(chat_id, "["+cmd+"] no response received")
     except Exception:
-        sendTextMessage(chat_id, "["+cmd+"] no response received")
+        sendTextMessage(chat_id, "["+cmd+"] could not read response")
         print("Could not send message")
 
 def processMessage(message):
@@ -71,6 +71,12 @@ def processCommandMessage(message):
        processComand(message["chat"]["id"], "stop")
     elif command == "/serviceStatus":
        processComand(message["chat"]["id"], "status")
+    elif command == "/healthAlive":
+       os.environ["BACKEND-HEALTH"] = "alive"
+       sendTextMessage(message["chat"]["id"], "[BACKEND-HEALTH]: " + os.environ["BACKEND-HEALTH"])
+    elif command == "/healthDead":
+       os.environ["BACKEND-HEALTH"] = "dead"
+       sendTextMessage(message["chat"]["id"], "[BACKEND-HEALTH]: " + os.environ["BACKEND-HEALTH"])
     else:
         sendTextMessage(message["chat"]["id"], "I do not know what you mean.")
 
@@ -131,6 +137,11 @@ Backend service manage
 /serviceRestart - Restart backend service entity
 /serviceStatus - Status of backend service entity
 /serviceStop - Stop backend service entity
+
+Backend healthcheck
+
+/healthAlive - Set healthcheck to alive
+/healthDead - Set healthcheck to dead
 
 You do not like me anymore?
 /stop - Sign off from the monitoring service
