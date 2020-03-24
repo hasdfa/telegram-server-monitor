@@ -28,7 +28,7 @@ def processCommand(chat_id, cmd):
         print("Could not send message")
 
 def changeHealthcheckStatus(status):
-    myfile = open(os.environ["BACKEND-HEALTH-FILE"], 'w')
+    myfile = open(os.getenv("BACKEND_HEALTH_FILE", "/BackendHealth"), 'w')
     myfile.write(status)
     myfile.close()
     sendTextMessage(message["chat"]["id"], "[BACKEND-HEALTH]: " + status)
