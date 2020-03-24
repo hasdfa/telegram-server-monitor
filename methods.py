@@ -6,6 +6,7 @@ import persistence
 import time
 import subprocess
 import traceback
+import os
 
 last_notification = 0
 storage = persistence.Persistence()
