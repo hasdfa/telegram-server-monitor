@@ -33,7 +33,6 @@ def changeHealthcheckStatus(status):
     myfile.close()
     sendTextMessage(message["chat"]["id"], "[BACKEND-HEALTH]: " + status)
 
-
 def processMessage(message):
     if "text" in message:
         processTextMessage(message)
