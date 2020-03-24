@@ -27,11 +27,11 @@ def processCommand(chat_id, cmd):
         sendTextMessage(chat_id, "["+cmd+"] could not read response")
         print("Could not send message")
 
-def changeHealthcheckStatus(status):
+def changeHealthcheckStatus(chat_id, status):
     myfile = open(os.getenv("BACKEND_HEALTH_FILE", "/BackendHealth"), 'w')
     myfile.write(status)
     myfile.close()
-    sendTextMessage(message["chat"]["id"], "[BACKEND-HEALTH]: " + status)
+    sendTextMessage(chat_id, "[BACKEND-HEALTH]: " + status)
 
 def processMessage(message):
     if "text" in message:
@@ -79,9 +79,9 @@ def processCommandMessage(message):
     elif command == "/serviceStatus":
        processComand(message["chat"]["id"], "status")
     elif command == "/healthAlive":
-       changeHealthcheckStatus("alive")
+       changeHealthcheckStatus(message["chat"]["id"], "alive")
     elif command == "/healthDead":
-       changeHealthcheckStatus("dead")
+       changeHealthcheckStatus(message["chat"]["id"], "dead")
     else:
         sendTextMessage(message["chat"]["id"], "I do not know what you mean.")
 
