@@ -37,6 +37,9 @@ class Persistence:
     def registerLastUpdate(self, id):
         self.updates.id = id
         self.save()
+    
+    def getLastUpdate(self):
+        return self.updates.id
 
     def save(self):
         saveFlie(module_name_users)
