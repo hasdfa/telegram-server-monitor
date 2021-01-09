@@ -1,10 +1,10 @@
+from subprocess import check_output
 import requests
 import datetime
 import psutil
 import config
 import persistence
 import time
-import subprocess
 import traceback
 import os
 
@@ -12,20 +12,14 @@ last_notification = 0
 storage = persistence.Persistence()
 
 def processCommand(chat_id, cmd):
-    risp = ""
     try:
-        risp = subprocess.check_output("service backend " + cmd, shell=True)
+        sendTextMessage(chat_id, "$ {0}\n".format(check_output(cmd, shell=True)))
     except Exception as err:
         print('Error received:\n')
         sendTextMessage(chat_id, err)
-    try:
-        if risp != "":
-            sendTextMessage(chat_id, risp)
-        else:
-            sendTextMessage(chat_id, "["+cmd+"] no response received")
-    except Exception:
-        sendTextMessage(chat_id, "["+cmd+"] could not read response")
-        print("Could not send message")
+
+def processSystemctlCommand(chat_id, ctl_action, service_name):
+    processCommand(chat_id, "systemctl -l -q {0} {1}\n".format(ctl_action, service_name))
 
 def changeHealthcheckStatus(chat_id, status):
     myfile = open(os.getenv("BACKEND_HEALTH_FILE", "/BackendHealth"), 'w')
@@ -44,7 +38,11 @@ def processTextMessage(message):
         processCommandMessage(message)
 
 def processCommandMessage(message):
+    chat_id = message["chat"]["id"]
     text = message["text"]
+    
+    def unsupportedCommand(overwrite="{0} - unsupported command"):
+        sendTextMessage(chat_id, overwrite.format(text))
 
     if " " in text:
         command, parameter = text.split(" ", 1)
@@ -56,6 +54,7 @@ def processCommandMessage(message):
         command, botname = command.split("@", 1)
         if botname.lower() != config.NAME.lower():
             # Ignore messages for other bots
+            unsupportedCommand()
             return
 
     if command == "/start":
@@ -70,20 +69,25 @@ def processCommandMessage(message):
         commandUsers(message)
     elif command == "/disks":
         commandDisks(message)
-    elif command == "/serviceStart":
-        processCommand(message["chat"]["id"], "start")
-    elif command == "/serviceRestart":
-        processCommand(message["chat"]["id"], "restart")
-    elif command == "/serviceStop":
-        processCommand(message["chat"]["id"], "stop")
-    elif command == "/serviceStatus":
-        processCommand(message["chat"]["id"], "status")
-    elif command == "/healthAlive":
-        changeHealthcheckStatus(message["chat"]["id"], "alive")
-    elif command == "/healthDead":
-        changeHealthcheckStatus(message["chat"]["id"], "dead")
+    elif command == "/shell":
+        processCommand(chat_id, parameter)
+    elif command == "/service":
+        if " " in text:
+            ctl_action, service_name = parameter.split(" ", 1)
+        else:
+            ctl_action = parameter
+            service_name = config.SYSTEMCTL_DEFAULT_SERVICE_NAME
+        if crl_action not in ["start", "status", "stop", "reload", "restart", "kill"]
+            unsupportedCommand()
+            return
+        processSystemctlCommand(chat_id, action, name)
+    elif command == "/health":
+        if parameter not in ["alive", "dead"]
+            unsupportedCommand()
+            return
+        changeHealthcheckStatus(chat_id, parameter)
     else:
-        sendTextMessage(message["chat"]["id"], "I do not know what you mean.")
+        unsupportedCommand()
 
 def sendTextMessage(chat_id, text):
     r = requests.post(config.API_URL + "sendMessage", json={
@@ -131,22 +135,23 @@ def commandHelp(message):
     chat_id = message["chat"]["id"]
     sendTextMessage(chat_id, config.NAME + """
 Monitor your server and query usage and network information.
-
 /usage - CPU and Memory information
 /users - Active users
 /disks - Disk usage
 
-Backend service manage
+Shell
+/shell $command - Execute ssh command
 
-/serviceStart - Start backend service entity
-/serviceRestart - Restart backend service entity
-/serviceStatus - Status of backend service entity
-/serviceStop - Stop backend service entity
+Systemctl service manage
+/service start $name - Start service
+/service status $name - Status of service
+/service restart $name - Restart service
+/service kill $name - Send signal to processes of a unit
+/service stop $name - Stop service
 
 Backend healthcheck
-
-/healthAlive - Set healthcheck to alive
-/healthDead - Set healthcheck to dead
+/health alive - Set healthcheck to alive
+/healt dead - Set healthcheck to dead
 
 You do not like me anymore?
 /stop - Sign off from the monitoring service
@@ -157,14 +162,18 @@ def commandUsage(message):
     if not storage.isRegisteredUser(chat_id):
         sendAuthMessage(chat_id)
         return
+    
+    virtual_memory = psutil.virtual_memory()
 
     text = """Uptime: {0}
-CPU: {1} %
-RAM: {2} %
-Swap: {3} %""".format(
+CPU: {1}%
+RAM: {2}% ({3}Mb of {4}Mb)
+Swap: {5}%""".format(
     str(datetime.datetime.now() - datetime.datetime.fromtimestamp(psutil.boot_time())),
     psutil.cpu_percent(),
-    psutil.virtual_memory().percent,
+    virtual_memory.percent,
+    (virtual_memory.total - virtual_memory.available) / (1024 * 1024),
+    virtual_memory.total / (1024 * 1024),
     psutil.swap_memory().percent)
 
     sendTextMessage(chat_id, text)
@@ -187,7 +196,13 @@ def commandDisks(message):
         sendAuthMessage(chat_id)
         return
 
-    text = ""
+    disk_usage = psutil.disk_usage('/')
+    text = "Used {0}Gb of {1}Gb (free {2}Gb):\n\n".format(
+        disk_usage.used / (1024 * 1024 * 1024),
+        disk_usage.total / (1024 * 1024 * 1024),
+        disk_usage.free / (1024 * 1024 * 1024)
+    )
+
     for dev in psutil.disk_partitions():
         text = text + "{0} ({1}) {2} %\n".format(dev.device, dev.mountpoint, psutil.disk_usage(dev.mountpoint).percent)
 
@@ -202,13 +217,16 @@ def alarms():
         should_send = False
 
         cpu = psutil.cpu_percent()
-        ram = psutil.virtual_memory().percent
+        virtual_memory = psutil.virtual_memory()
+        ram = virtual_memory.percent
+        ram_used = (virtual_memory.total - virtual_memory.available) / (1024 * 1024)
+        ram_total = virtual_memory.total / (1024 * 1024)
 
         if cpu > config.NOTIFY_CPU_PERCENT:
-            text = text + "CPU: {0} %\n".format(cpu)
+            text = text + "CPU: {0}%\n".format(cpu)
             should_send = True
         if ram > config.NOTIFY_RAM_PERCENT:
-            text = text + "RAM: {0} %\n".format(ram)
+            text = text + "RAM: {0}% ({1}Mb of {2}Mb)\n".format(ram, ram_used, ram_total)
             should_send = True
 
         if should_send:
@@ -216,3 +234,5 @@ def alarms():
             for id in storage.allUsers():
                 sendTextMessage(id, text)
 
+def commandShell(message, parameter):
+    parameter.strip()
