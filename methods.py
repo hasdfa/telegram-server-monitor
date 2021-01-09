@@ -17,7 +17,7 @@ def processCommand(chat_id, cmd):
     try:
         stdout = check_output(cmd, shell=True)
         print("[{0}] <<< {1}\n".format(chat_id, stdout))
-        sendTextMessage(chat_id, "sh$ {0}\n".format(stdout))
+        sendTextMessage(chat_id, "$ {0}\n".format(stdout))
     except Exception as err:
         print('Error received:\n')
         sendTextMessage(chat_id, err)
