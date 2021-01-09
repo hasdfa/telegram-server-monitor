@@ -16,17 +16,13 @@ class Persistence:
             # Initialize for first start
             self[moduleName] = defaultValue
     
-    def saveFlie(self, moduleName):
-        with open("{0}.json".format(moduleName), 'w') as outfile:
-            json.dump(self[moduleName], outfile)
-
     def registerUser(self, id):
         self.users.append(id)
-        self.save()
+        self.save(module_name_users)
 
     def unregisterUser(self, id):
         self.users.remove(id)
-        self.save()
+        self.save(module_name_users)
 
     def isRegisteredUser(self, id):
         return id in self.users
@@ -36,12 +32,11 @@ class Persistence:
     
     def registerLastUpdate(self, id):
         self.updates.id = id
-        self.save()
+        self.save(module_name_updates)
     
     def getLastUpdate(self):
         return self.updates.id
 
-    def save(self):
-        saveFlie(module_name_users)
-        saveFlie(module_name_updates)
-
+    def save(self, moduleName):
+        with open("{0}.json".format(moduleName), 'w') as outfile:
+            json.dump(self[moduleName], outfile)
