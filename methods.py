@@ -96,14 +96,14 @@ def processCommandMessage(message):
         unsupportedCommand()
 
 def sendTextMessage(chat_id, text):
-    r = requests.post(config.API_URL + "sendMessage", json={
-        "chat_id" : chat_id,
-        "text" : text
-    })
-
-    result = r.json()
-    if not result["ok"]:
-        print(result)
+    try:
+        r = requests.post(config.API_URL + "sendMessage", json={
+            "chat_id" : chat_id,
+            "text" : text
+        })
+        print(r.json())
+    except Exception as err:
+        print(err)
 
 def sendAuthMessage(chat_id):
     sendTextMessage(chat_id, "Please sign in first.")
