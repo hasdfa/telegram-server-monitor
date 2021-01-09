@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
+import persistence
 import requests
 import config
 import methods
 import atexit
 
-last_update_id = 0
-
 methods.startupMessage()
 atexit.register(methods.shutdownMessage)
+
+storage = persistence.Persistence()
+last_update_id = storage.getLastUpdate()
 
 while True:
     methods.alarms()
@@ -24,6 +26,7 @@ while True:
             update_id = update["update_id"]
             if update_id > last_update_id:
                 last_update_id = update_id
+                storage.registerLastUpdate(update_id)
 
             message = update.get("message")
             if message:
