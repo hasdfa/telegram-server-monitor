@@ -84,7 +84,7 @@ def processCommandMessage(message):
         if ctl_action not in ["start", "status", "stop", "reload", "restart", "kill"]:
             unsupportedCommand()
             return
-        processSystemctlCommand(chat_id, action, name)
+        processSystemctlCommand(chat_id, ctl_action, service_name)
     elif command == "/health":
         if parameter not in ["alive", "dead"]:
             unsupportedCommand()
