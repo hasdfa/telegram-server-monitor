@@ -10,7 +10,7 @@ import os
 import re
 
 last_notification = 0
-storage = persistence.Persistence()
+storage = persistence.UsersDatabase()
 
 def processCommand(chat_id, cmd):
     print("[{0}] >>> {1}\n".format(chat_id, cmd))
