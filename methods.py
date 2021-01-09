@@ -172,8 +172,8 @@ Swap: {5}%""".format(
     str(datetime.datetime.now() - datetime.datetime.fromtimestamp(psutil.boot_time())),
     psutil.cpu_percent(),
     virtual_memory.percent,
-    (virtual_memory.total - virtual_memory.available) / (1024 * 1024),
-    virtual_memory.total / (1024 * 1024),
+    "%.2f" % ((virtual_memory.total - virtual_memory.available) / (1024 * 1024)),
+    "%.2f" % (virtual_memory.total / (1024 * 1024)),
     psutil.swap_memory().percent)
 
     sendTextMessage(chat_id, text)
@@ -198,9 +198,9 @@ def commandDisks(message):
 
     disk_usage = psutil.disk_usage('/')
     text = "Used {0}Gb of {1}Gb (free {2}Gb):\n\n".format(
-        disk_usage.used / (1024 * 1024 * 1024),
-        disk_usage.total / (1024 * 1024 * 1024),
-        disk_usage.free / (1024 * 1024 * 1024)
+        "%.2f" % (disk_usage.used / (1024 * 1024 * 1024)),
+        "%.2f" % (disk_usage.total / (1024 * 1024 * 1024)),
+        "%.2f" % (disk_usage.free / (1024 * 1024 * 1024))
     )
 
     for dev in psutil.disk_partitions():
@@ -219,8 +219,8 @@ def alarms():
         cpu = psutil.cpu_percent()
         virtual_memory = psutil.virtual_memory()
         ram = virtual_memory.percent
-        ram_used = (virtual_memory.total - virtual_memory.available) / (1024 * 1024)
-        ram_total = virtual_memory.total / (1024 * 1024)
+        ram_used = "%.2f" % ((virtual_memory.total - virtual_memory.available) / (1024 * 1024))
+        ram_total = "%.2f" % (virtual_memory.total / (1024 * 1024))
 
         if cpu > config.NOTIFY_CPU_PERCENT:
             text = text + "CPU: {0}%\n".format(cpu)
