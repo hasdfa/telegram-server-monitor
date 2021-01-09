@@ -8,7 +8,7 @@ import atexit
 methods.startupMessage()
 atexit.register(methods.shutdownMessage)
 
-storage = persistence.Persistence()
+storage = persistence.UpdatesDatabase()
 last_update_id = storage.getLastUpdate()
 
 while True:
