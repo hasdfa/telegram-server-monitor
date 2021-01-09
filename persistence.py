@@ -31,11 +31,11 @@ class Persistence:
         return self.users
     
     def registerLastUpdate(self, id):
-        self.updates.id = id
+        self.updates["id"] = id
         self.save_updates()
     
     def getLastUpdate(self):
-        return self.updates.id
+        return self.updates["id"]
 
     def save_users(self):
         self.save(self.users, module_name_users)
