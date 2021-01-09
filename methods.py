@@ -7,6 +7,7 @@ import persistence
 import time
 import traceback
 import os
+import re
 
 last_notification = 0
 storage = persistence.Persistence()
@@ -16,8 +17,9 @@ def processCommand(chat_id, cmd):
     stdout = ""
     try:
         stdout = check_output(cmd, shell=True)
+        stdout = stdout.decode("utf-8")
         print("[{0}] <<< {1}\n".format(chat_id, stdout))
-        sendTextMessage(chat_id, "$ " + stdout + "\n")
+        sendTextMessage(chat_id, "$ {0}\n".format(stdout))
     except Exception as err:
         print('Error received:\n')
         sendTextMessage(chat_id, err)
