@@ -5,24 +5,24 @@ module_name_updates = 'updates'
 
 class Persistence:
     def __init__(self):
-        self.loadFile(module_name_users, [])
-        self.loadFile(module_name_updates, {id:0})
+        self.users = self.loadFile(module_name_users, [])
+        self.updates = self.loadFile(module_name_updates, {id:0})
             
     def loadFile(self, moduleName, defaultValue):
         try:
             with open("{0}.json".format(moduleName)) as file:
-                self[moduleName] = json.load(file)
+                return json.load(file)
         except FileNotFoundError:
             # Initialize for first start
-            self[moduleName] = defaultValue
+            return defaultValue
     
     def registerUser(self, id):
         self.users.append(id)
-        self.save(module_name_users)
+        self.save_users()
 
     def unregisterUser(self, id):
         self.users.remove(id)
-        self.save(module_name_users)
+        self.save_users()
 
     def isRegisteredUser(self, id):
         return id in self.users
@@ -32,11 +32,17 @@ class Persistence:
     
     def registerLastUpdate(self, id):
         self.updates.id = id
-        self.save(module_name_updates)
+        self.save_updates()
     
     def getLastUpdate(self):
         return self.updates.id
 
-    def save(self, moduleName):
+    def save_users(self):
+        self.save(self.users, module_name_users)
+     
+    def save_updates(self):
+        self.save(self.updates, module_name_updates)
+    
+    def save(self, jsonValue, moduleName):
         with open("{0}.json".format(moduleName), 'w') as outfile:
-            json.dump(self[moduleName], outfile)
+            json.dump(jsonValue, outfile)
