@@ -20,10 +20,13 @@ ENABLE_NOTIFICATIONS = True
 NOTIFCATION_INTERVAL = 60
 
 # Maximum cpu percent considered to be normal
-NOTIFY_CPU_PERCENT = 50
+NOTIFY_CPU_PERCENT = 75
 
 # Maximum memory percent considered to be normal
-NOTIFY_RAM_PERCENT = 50
+NOTIFY_RAM_PERCENT = 75
+
+# Name of the Systemctl service, required if you will use /service ... command
+SYSTEMCTL_DEFAULT_SERVICE_NAME = ""
 
 # DO NOT EDIT BELOW THIS LINE
 # ===========================
