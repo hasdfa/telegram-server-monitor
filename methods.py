@@ -81,7 +81,7 @@ def processCommandMessage(message):
         else:
             ctl_action = parameter
             service_name = config.SYSTEMCTL_DEFAULT_SERVICE_NAME
-        if crl_action not in ["start", "status", "stop", "reload", "restart", "kill"]:
+        if ctl_action not in ["start", "status", "stop", "reload", "restart", "kill"]:
             unsupportedCommand()
             return
         processSystemctlCommand(chat_id, action, name)
