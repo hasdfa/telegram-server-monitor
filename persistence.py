@@ -6,7 +6,7 @@ module_name_updates = 'updates'
 class Persistence:
     def __init__(self):
         self.users = self.loadFile(module_name_users, [])
-        self.updates = self.loadFile(module_name_updates, {id:0})
+        self.updates = self.loadFile(module_name_updates, {"id":0})
             
     def loadFile(self, moduleName, defaultValue):
         try:
@@ -31,11 +31,14 @@ class Persistence:
         return self.users
     
     def registerLastUpdate(self, id):
-        self.updates["id"] = id
+        self.updates = {"id":id}
         self.save_updates()
     
     def getLastUpdate(self):
-        return self.updates["id"]
+        try:
+            return self.updates["id"]
+        except Exception:
+            return 0
 
     def save_users(self):
         self.save(self.users, module_name_users)
@@ -46,3 +49,4 @@ class Persistence:
     def save(self, jsonValue, moduleName):
         with open("{0}.json".format(moduleName), 'w') as outfile:
             json.dump(jsonValue, outfile)
+
