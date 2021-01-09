@@ -25,7 +25,11 @@ while True:
             if update_id > last_update_id:
                 last_update_id = update_id
 
-            methods.processMessage(update["message"])
+            message = update.get("message")
+            if message:
+                methods.processMessage(update["message"])
+            else:
+                print("Could not resolve message: {0}".format(update))
     else:
         # TODO error handling
         print(result)
