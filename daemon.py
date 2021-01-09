@@ -30,7 +30,10 @@ while True:
 
             message = update.get("message")
             if message:
-                methods.processMessage(update["message"])
+                try:
+                    methods.processMessage(update["message"])
+                except Exception as err:
+                    print(err)
             else:
                 print("Could not resolve message: {0}".format(update))
     else:
