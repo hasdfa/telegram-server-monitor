@@ -29,7 +29,7 @@ sudo python3 -m pip install requests psutil --upgrade
 su telegram
 cd ~
 
-git clone https://github.com/syxolk/telegram-server-monitor.git
+git clone https://github.com/hasdfa/telegram-server-monitor.git
 cd telegram-server-monitor
 cp config.template.py config.py
 
