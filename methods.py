@@ -19,10 +19,10 @@ def processCommand(chat_id, cmd):
         stdout = check_output(cmd, shell=True)
         stdout = stdout.decode("utf-8")
         print("[{0}] <<< {1}\n".format(chat_id, stdout))
-        sendTextMessage(chat_id, "$ {0}\n".format(stdout))
     except Exception as err:
-        print('Error received:\n')
-        sendTextMessage(chat_id, err)
+        print("Error received: {}\n".format(err))
+        stdout = "{0}".format(err)
+    sendTextMessage(chat_id, "$ {0}\n".format(stdout))
 
 def processSystemctlCommand(chat_id, ctl_action, service_name):
     processCommand(chat_id, "systemctl -l -q {0} {1}\n".format(ctl_action, service_name))
@@ -36,12 +36,16 @@ def changeHealthcheckStatus(chat_id, status):
 def processMessage(message):
     if "text" in message:
         processTextMessage(message)
+    else:
+        raise Exception("Unsupported message type")
 
 def processTextMessage(message):
     text = message["text"]
 
     if text.startswith("/"):
         processCommandMessage(message)
+     else:
+        raise Exception("Plain text is not supported")
 
 def processCommandMessage(message):
     chat_id = message["chat"]["id"]
@@ -103,7 +107,7 @@ def sendTextMessage(chat_id, text):
         })
         print(r.json())
     except Exception as err:
-        print(err)
+        print("Send error: {0}\n".format(err))
 
 def sendAuthMessage(chat_id):
     sendTextMessage(chat_id, "Please sign in first.")
@@ -181,7 +185,6 @@ Swap: {5}%""".format(
     "%.2f" % ((virtual_memory.total - virtual_memory.available) / (1024 * 1024)),
     "%.2f" % (virtual_memory.total / (1024 * 1024)),
     psutil.swap_memory().percent)
-
     sendTextMessage(chat_id, text)
 
 def commandUsers(message):
@@ -193,6 +196,8 @@ def commandUsers(message):
     text = ""
     for user in psutil.users():
         text = text + "{0}@{1} {2}\n".format(user.name, user.host, str(datetime.datetime.fromtimestamp(user.started)))
+    if text == "":
+        text = "No such users logged in\n"
 
     sendTextMessage(chat_id, text)
 
@@ -224,15 +229,26 @@ def alarms():
 
         cpu = psutil.cpu_percent()
         virtual_memory = psutil.virtual_memory()
+        
         ram = virtual_memory.percent
         ram_used = "%.2f" % ((virtual_memory.total - virtual_memory.available) / (1024 * 1024))
         ram_total = "%.2f" % (virtual_memory.total / (1024 * 1024))
-
+        
+        disk_usage = psutil.disk_usage('/')
+        storage_percent = disk_usage.used / disk_usage.total
+        
         if cpu > config.NOTIFY_CPU_PERCENT:
             text = text + "CPU: {0}%\n".format(cpu)
             should_send = True
         if ram > config.NOTIFY_RAM_PERCENT:
             text = text + "RAM: {0}% ({1}Mb of {2}Mb)\n".format(ram, ram_used, ram_total)
+            should_send = True
+        if storage_percent > config.NOTIFY_STORAGE_PERCENT:
+            text = text + "Storage space: {0}% ({1}Gb of {2}Gb)\n".format(
+                "%.2f" % storage_percent,
+                "%.2f" % (disk_usage.used / (1024 * 1024 * 1024)),
+                "%.2f" % (disk_usage.total / (1024 * 1024 * 1024)),
+            )
             should_send = True
 
         if should_send:
