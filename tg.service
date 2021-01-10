@@ -1,0 +1,15 @@
+[Unit]
+Description=Monitoring Bot
+After=multi-user.target
+
+[Service]
+Type=idle
+OOMScoreAdjust=1000
+Restart=always
+StartLimitBurst=5000
+StartLimitIntervalSec=5
+ExecStart=/usr/bin/python3 /home/telegram/telegram-server-monitor/daemon.py
+ExecStop=service tg restart
+
+[Install]
+WantedBy=multi-user.target
