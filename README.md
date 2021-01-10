@@ -2,6 +2,31 @@
 
 Monitoring service writen in Python3 to be hosted on your own server.
 
+## Commands
+```
+Monitor your server and query usage and network information.
+/usage - CPU and Memory information
+/users - Active users
+/disks - Disk usage
+
+Shell
+/shell $command - Execute shell command
+
+Systemctl service manage
+/service start $name - Start service
+/service status $name - Status of service
+/service restart $name - Restart service
+/service kill $name - Send signal to processes of a unit
+/service stop $name - Stop service
+
+Backend healthcheck
+/health alive - Set healthcheck to alive
+/healt dead - Set healthcheck to dead
+
+You do not like me anymore?
+/stop - Sign off from the monitoring service
+```
+
 ## Installation
 **Talk to @BotFather on Telegram**
 - Type `/start` to start a conversation with the bot father.
