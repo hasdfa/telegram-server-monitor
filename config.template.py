@@ -25,6 +25,9 @@ NOTIFY_CPU_PERCENT = 75
 # Maximum memory percent considered to be normal
 NOTIFY_RAM_PERCENT = 75
 
+# Maximum storage percent consider to be normal
+NOTIFY_STORAGE_PERCENT = 75
+
 # Name of the Systemctl service, required if you will use /service ... command
 SYSTEMCTL_DEFAULT_SERVICE_NAME = ""
 
